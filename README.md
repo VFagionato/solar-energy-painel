@@ -1,15 +1,15 @@
 # Solar Winds - Full Stack Application
 
-A modern full stack application built with React + TypeScript frontend, NestJS backend, and MongoDB database. Features GSAP animations and follows Clean Architecture and SOLID principles.
+A modern full stack application built with React + TypeScript frontend, NestJS backend, and PostgreSQL database. Features GSAP animations and follows Clean Architecture and SOLID principles.
 
 ## 🏗️ Project Structure
 
 ```
 solar-winds/
 ├── frontend/          # React + TypeScript + Vite
-├── backend/           # NestJS + MongoDB
-├── docker-compose.yml # MongoDB containerization
-├── Dockerfile.mongo   # MongoDB Docker configuration
+├── backend/           # NestJS + PostgreSQL + TypeORM
+├── docker-compose.yml # PostgreSQL containerization
+├── init-scripts/      # Database initialization scripts
 └── README.md
 ```
 
@@ -23,13 +23,16 @@ solar-winds/
 
 ### Backend
 - **NestJS 11.1.5** with TypeScript
-- **MongoDB 7.0** with Mongoose ODM
+- **PostgreSQL 15** with TypeORM
+- **TypeORM entities** with business logic validation
 - **Environment-based configuration**
 - **CORS enabled** for frontend communication
 
 ### Database
-- **MongoDB 7.0** running in Docker container
+- **PostgreSQL 15** running in Docker container
+- **TypeORM** for database operations and migrations
 - **Persistent data storage** with Docker volumes
+- **Solar energy monitoring entities**: Users, Addresses, Sensors, Events
 
 ## 📋 Prerequisites
 
@@ -59,8 +62,8 @@ cp .env.example .env
 
 Edit `backend/.env` and configure your environment variables:
 ```env
-DATABASE_URL=mongodb://admin:password@localhost:27017/solarwinds?authSource=admin
-PORT=3000
+DATABASE_URL=postgresql://admin:password@localhost:5432/solarwinds
+PORT=8001
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 FRONTEND_URL=http://localhost:5173
 # ... other configurations
@@ -74,7 +77,7 @@ cp .env.example .env
 
 Edit `frontend/.env` and configure your environment variables:
 ```env
-VITE_API_BASE_URL=http://localhost:3000
+VITE_API_BASE_URL=http://localhost:8001
 VITE_APP_NAME=Solar Winds
 VITE_ENABLE_DEBUG=true
 # ... other configurations
@@ -82,7 +85,7 @@ VITE_ENABLE_DEBUG=true
 
 ### 3. Database Setup
 
-Start the MongoDB database using Docker:
+Start the PostgreSQL database using Docker:
 
 ```bash
 # From the root directory (solar-winds/)
@@ -91,7 +94,7 @@ docker-compose up -d
 
 Verify the database is running:
 ```bash
-docker-compose logs mongodb
+docker-compose logs postgres
 ```
 
 ### 4. Backend Setup
@@ -106,7 +109,7 @@ npm install
 npm run start:dev
 ```
 
-The backend API will be available at `http://localhost:3000`
+The backend API will be available at `http://localhost:8001`
 
 ### 5. Frontend Setup
 
@@ -169,15 +172,15 @@ Use the provided startup scripts to automate the entire process:
 - ✅ Check prerequisites (Docker, Node.js, npm)
 - ✅ Verify environment files (create from examples if missing)
 - ✅ Check for port conflicts
-- ✅ Start MongoDB container
+- ✅ Start PostgreSQL container
 - ✅ Install dependencies if needed
 - ✅ Start backend and frontend servers
 - ✅ Provide real-time status and logs
 
 The application will be available at:
 - **Frontend:** http://localhost:5173
-- **Backend API:** http://localhost:3000
-- **Database:** localhost:27017
+- **Backend API:** http://localhost:8001
+- **Database:** localhost:5432
 
 ## 📝 Available Scripts
 
@@ -209,10 +212,10 @@ npm run build       # Build for production
 
 ### Database Scripts (from root directory)
 ```bash
-docker-compose up -d              # Start MongoDB in detached mode
+docker-compose up -d              # Start PostgreSQL in detached mode
 docker-compose down               # Stop and remove containers
-docker-compose logs mongodb       # View MongoDB logs
-docker-compose restart mongodb    # Restart MongoDB container
+docker-compose logs postgres      # View PostgreSQL logs
+docker-compose restart postgres   # Restart PostgreSQL container
 ```
 
 ## 🔧 Development Workflow
@@ -240,7 +243,7 @@ docker-compose up -d
 docker-compose down
 
 # View logs
-docker-compose logs -f mongodb
+docker-compose logs -f postgres
 
 # Remove volumes (⚠️ This will delete all data)
 docker-compose down -v
@@ -283,17 +286,17 @@ npm test                   # Run tests (when configured)
 1. **Port already in use:**
    ```bash
    # Check what's using the port
-   netstat -ano | findstr :3000
+   netstat -ano | findstr :8001
    netstat -ano | findstr :5173
    ```
 
-2. **MongoDB connection failed:**
+2. **PostgreSQL connection failed:**
    ```bash
-   # Check if MongoDB container is running
+   # Check if PostgreSQL container is running
    docker ps
    
-   # Restart MongoDB
-   docker-compose restart mongodb
+   # Restart PostgreSQL
+   docker-compose restart postgres
    ```
 
 3. **Environment variables not loaded:**
@@ -306,8 +309,8 @@ npm test                   # Run tests (when configured)
 
 ### Getting Help
 
-- Check the logs: `docker-compose logs mongodb`
-- Verify API health: Visit `http://localhost:3000/health`
+- Check the logs: `docker-compose logs postgres`
+- Verify API health: Visit `http://localhost:8001/health`
 - Check environment: The frontend displays current environment configuration
 
 ## 🤝 Contributing
