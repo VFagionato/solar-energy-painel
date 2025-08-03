@@ -7,7 +7,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   
   // Get environment variables
-  const port = configService.get<number>('PORT', 3000);
+  const port = configService.get<number>('PORT', 8001);
   const frontendUrl = configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
   const allowedOrigins = configService.get<string>('ALLOWED_ORIGINS', frontendUrl)
     .split(',')

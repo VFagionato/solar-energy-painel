@@ -31,7 +31,7 @@ interface EnvironmentConfig {
 
 const config: EnvironmentConfig = {
   api: {
-    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001',
     timeout: parseInt(import.meta.env.VITE_API_TIMEOUT) || 10000,
   },
   app: {

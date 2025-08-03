@@ -1,24 +1,27 @@
-import React from 'react';
-import { Layout, Menu, Card, Row, Col, Tabs, Space, Avatar, Typography, Badge, Switch, Button } from 'antd';
-import { 
-  DashboardOutlined, UserOutlined, ExperimentOutlined, 
-  SearchOutlined, BarChartOutlined, SettingOutlined,
-  ThunderboltOutlined, FireOutlined, CalendarOutlined,
-  MenuFoldOutlined, MenuUnfoldOutlined
+import {
+  BarChartOutlined,
+  CalendarOutlined,
+  DashboardOutlined,
+  ExperimentOutlined,
+  MenuFoldOutlined, MenuUnfoldOutlined,
+  SearchOutlined,
+  SettingOutlined,
+  ThunderboltOutlined,
+  UserOutlined
 } from '@ant-design/icons';
+import { Avatar, Badge, Button, Card, Col, Layout, Menu, Row, Space, Switch, Typography } from 'antd';
+import dayjs from 'dayjs';
+import React from 'react';
+import { useEvents, useSensors, useUsers } from '../../hooks';
 import EventsAggregationChart from '../charts/EventsAggregationChart';
 import PowerGenerationChart from '../charts/PowerGenerationChart';
-import GlobalSearch from '../search/GlobalSearch';
-import AdvancedFilters from '../search/AdvancedFilters';
-import UserManagement from '../forms/UserManagement';
 import SensorManagement from '../forms/SensorManagement';
-import { useUsers, useSensors, useEvents } from '../../hooks';
-import type { User, Sensor, Event } from '../../types';
-import dayjs from 'dayjs';
+import UserManagement from '../forms/UserManagement';
+import AdvancedFilters from '../search/AdvancedFilters';
+import GlobalSearch from '../search/GlobalSearch';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 
 const Dashboard: React.FC = () => {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -56,8 +59,8 @@ const Dashboard: React.FC = () => {
     const totalUsers = users?.length || 0;
     const totalSensors = sensors?.length || 0;
     const totalEvents = events?.length || 0;
-    const totalPower = sensors?.reduce((sum, sensor) => sum + sensor.power_generate, 0) || 0;
-    
+    const totalPower = sensors ? sensors.reduce((sum, sensor) => sum + (Number(sensor.power_generate) || 0), 0) : 0;
+
     return { totalUsers, totalSensors, totalEvents, totalPower };
   };
 
@@ -140,7 +143,7 @@ const Dashboard: React.FC = () => {
               />
               <div>
                 <Text type="secondary">Total Power</Text>
-                <Title level={3} style={{ margin: 0 }}>{stats.totalPower.toFixed(1)} kW</Title>
+                <Title level={3} style={{ margin: 0 }}>{(stats.totalPower ?? 0)} kW</Title>
               </div>
             </div>
           </Card>

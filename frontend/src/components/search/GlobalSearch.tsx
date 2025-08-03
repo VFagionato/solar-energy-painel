@@ -81,7 +81,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({
         const numericValue = parseFloat(value);
         const filteredEvents = eventsResult.value.filter(event => {
           if (!isNaN(numericValue)) {
-            return event.power_generated >= numericValue || event.heat >= numericValue;
+            return (Number(event.power_generated) || 0) >= numericValue || (Number(event.heat) || 0) >= numericValue;
           }
           return true;
         });

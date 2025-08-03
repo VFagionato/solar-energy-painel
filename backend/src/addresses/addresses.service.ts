@@ -42,7 +42,7 @@ export class AddressesService {
   async update(uuid: string, updateAddressDto: UpdateAddressDto): Promise<Address> {
     const address = await this.findOne(uuid);
 
-    if (updateAddressDto.user_uuid !== undefined || updateAddressDto.sensor_uuid !== undefined) {
+    if ('user_uuid' in updateAddressDto || 'sensor_uuid' in updateAddressDto) {
       const updatedData = { ...address, ...updateAddressDto };
       this.validateUserOrSensorUuid(updatedData);
     }
@@ -115,7 +115,7 @@ export class AddressesService {
       .getMany();
   }
 
-  private validateUserOrSensorUuid(addressData: Partial<CreateAddressDto | UpdateAddressDto>): void {
+  private validateUserOrSensorUuid(addressData: any): void {
     const hasUserUuid = addressData.user_uuid != null && addressData.user_uuid.trim() !== '';
     const hasSensorUuid = addressData.sensor_uuid != null && addressData.sensor_uuid.trim() !== '';
 

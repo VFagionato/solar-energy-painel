@@ -23,6 +23,9 @@ export class Sensor {
   @Column({ type: 'uuid', name: 'equip_address_uuid' })
   equip_address_uuid: string;
 
+  @Column({ type: 'uuid', nullable: true })
+  user_uuid: string;
+
   @Column({ type: 'int', default: 0 })
   total_events: number;
 

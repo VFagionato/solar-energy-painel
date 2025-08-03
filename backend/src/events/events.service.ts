@@ -77,8 +77,8 @@ export class EventsService {
   async update(uuid: string, updateEventDto: UpdateEventDto): Promise<Event> {
     const event = await this.findOne(uuid);
 
-    if (updateEventDto.timestamp) {
-      updateEventDto.timestamp = new Date(updateEventDto.timestamp).toISOString();
+    if ('timestamp' in updateEventDto && updateEventDto.timestamp) {
+      updateEventDto.timestamp = new Date(updateEventDto.timestamp).toISOString() as any;
     }
 
     Object.assign(event, updateEventDto);

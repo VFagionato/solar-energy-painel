@@ -10,25 +10,35 @@ interface PowerGenerationChartProps {
   timeRange?: 'day' | 'week' | 'month';
 }
 
-const PowerGenerationChart: React.FC<PowerGenerationChartProps> = ({
+const PowerGenerationChart: React.FC<PowerGenerationChartProps> = React.memo(({
   sensorUuid,
   timeRange = 'day',
 }) => {
-  const now = dayjs();
-  const startDate = React.useMemo(() => {
+  const { startDate, endDate } = React.useMemo(() => {
+    const now = dayjs();
+    let start: dayjs.Dayjs;
+    
     switch (timeRange) {
       case 'day':
-        return now.subtract(1, 'day').toISOString();
+        start = now.subtract(1, 'day');
+        break;
       case 'week':
-        return now.subtract(1, 'week').toISOString();
+        start = now.subtract(1, 'week');
+        break;
       case 'month':
-        return now.subtract(1, 'month').toISOString();
+        start = now.subtract(1, 'month');
+        break;
       default:
-        return now.subtract(1, 'day').toISOString();
+        start = now.subtract(1, 'day');
     }
-  }, [timeRange, now]);
+    
+    return {
+      startDate: start.toISOString(),
+      endDate: now.toISOString(),
+    };
+  }, [timeRange]);
 
-  const { data: events, isLoading, error } = useEvents(startDate, now.toISOString());
+  const { data: events, isLoading, error } = useEvents(startDate, endDate);
 
   const filteredEvents = React.useMemo(() => {
     if (!events) return [];
@@ -40,8 +50,8 @@ const PowerGenerationChart: React.FC<PowerGenerationChartProps> = ({
   const chartData = React.useMemo(() => {
     return filteredEvents.map(event => ({
       time: dayjs(event.timestamp).format('HH:mm'),
-      power: event.power_generated,
-      heat: event.heat,
+      power: Number(event.power_generated) || 0,
+      heat: Number(event.heat) || 0,
       date: dayjs(event.timestamp).format('YYYY-MM-DD'),
     })).sort((a, b) => new Date(`${a.date} ${a.time}`).getTime() - new Date(`${b.date} ${b.time}`).getTime());
   }, [filteredEvents]);
@@ -57,14 +67,14 @@ const PowerGenerationChart: React.FC<PowerGenerationChartProps> = ({
       };
     }
 
-    const totalPower = filteredEvents.reduce((sum, event) => sum + event.power_generated, 0);
-    const totalHeat = filteredEvents.reduce((sum, event) => sum + event.heat, 0);
-    const maxPower = Math.max(...filteredEvents.map(event => event.power_generated));
-    const averagePower = totalPower / filteredEvents.length;
-    const averageHeat = totalHeat / filteredEvents.length;
+    const totalPower = filteredEvents.reduce((sum, event) => sum + (Number(event.power_generated) || 0), 0);
+    const totalHeat = filteredEvents.reduce((sum, event) => sum + (Number(event.heat) || 0), 0);
+    const maxPower = Math.max(...filteredEvents.map(event => Number(event.power_generated) || 0));
+    const averagePower = filteredEvents.length > 0 ? totalPower / filteredEvents.length : 0;
+    const averageHeat = filteredEvents.length > 0 ? totalHeat / filteredEvents.length : 0;
     
     // Simple efficiency calculation based on power vs heat ratio
-    const efficiency = averageHeat > 0 ? Math.min((averagePower / averageHeat) * 10, 100) : 0;
+    const efficiency = averageHeat > 0 && averagePower > 0 ? Math.min((averagePower / averageHeat) * 10, 100) : 0;
 
     return {
       totalPower,
@@ -75,7 +85,7 @@ const PowerGenerationChart: React.FC<PowerGenerationChartProps> = ({
     };
   }, [filteredEvents]);
 
-  const areaConfig = {
+  const areaConfig = React.useMemo(() => ({
     data: chartData,
     xField: 'time',
     yField: 'power',
@@ -114,9 +124,9 @@ const PowerGenerationChart: React.FC<PowerGenerationChartProps> = ({
         duration: 1500,
       },
     },
-  };
+  }), [chartData]);
 
-  const gaugeConfig = {
+  const gaugeConfig = React.useMemo(() => ({
     percent: stats.efficiency / 100,
     range: {
       color: '#30BF78',
@@ -140,7 +150,7 @@ const PowerGenerationChart: React.FC<PowerGenerationChartProps> = ({
           fontSize: '36px',
           lineHeight: '36px',
         },
-        formatter: () => `${stats.efficiency.toFixed(1)}%`,
+        formatter: () => `${(stats.efficiency || 0).toFixed(1)}%`,
       },
     },
     animation: {
@@ -149,7 +159,7 @@ const PowerGenerationChart: React.FC<PowerGenerationChartProps> = ({
         duration: 1000,
       },
     },
-  };
+  }), [stats.efficiency]);
 
   if (error) {
     return (
@@ -240,6 +250,6 @@ const PowerGenerationChart: React.FC<PowerGenerationChartProps> = ({
       </Row>
     </Card>
   );
-};
+});
 
 export default PowerGenerationChart;

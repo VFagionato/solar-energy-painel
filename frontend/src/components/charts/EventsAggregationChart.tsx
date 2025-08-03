@@ -13,13 +13,32 @@ interface EventsAggregationChartProps {
   showFilters?: boolean;
 }
 
-const EventsAggregationChart: React.FC<EventsAggregationChartProps> = ({
+const EventsAggregationChart: React.FC<EventsAggregationChartProps> = React.memo(({
   chartType = 'line',
   showFilters = true,
 }) => {
   const [selectedUser, setSelectedUser] = React.useState<string | undefined>();
   const [selectedSensor, setSelectedSensor] = React.useState<string | undefined>();
   const [dateRange, setDateRange] = React.useState<[string, string] | undefined>();
+
+  const handleUserChange = React.useCallback((value: string | undefined) => {
+    setSelectedUser(value);
+  }, []);
+
+  const handleSensorChange = React.useCallback((value: string | undefined) => {
+    setSelectedSensor(value);
+  }, []);
+
+  const handleDateRangeChange = React.useCallback((dates: any) => {
+    if (dates) {
+      setDateRange([
+        dates[0]?.toISOString() || '',
+        dates[1]?.toISOString() || '',
+      ]);
+    } else {
+      setDateRange(undefined);
+    }
+  }, []);
 
   const { data: events, isLoading: eventsLoading, error: eventsError } = useEvents(
     dateRange?.[0],
@@ -50,8 +69,8 @@ const EventsAggregationChart: React.FC<EventsAggregationChartProps> = ({
 
       return {
         date: dayjs(event.timestamp).format('YYYY-MM-DD HH:mm'),
-        power: event.power_generated,
-        heat: event.heat,
+        power: Number(event.power_generated) || 0,
+        heat: Number(event.heat) || 0,
         sensor: sensor?.code || 'Unknown',
         user: user ? `${user.name} ${user.last_name}` : 'Unknown',
       };
@@ -88,7 +107,7 @@ const EventsAggregationChart: React.FC<EventsAggregationChartProps> = ({
     }));
   }, [chartData]);
 
-  const lineConfig = {
+  const lineConfig = React.useMemo(() => ({
     data: chartData,
     xField: 'date',
     yField: 'power',
@@ -122,9 +141,9 @@ const EventsAggregationChart: React.FC<EventsAggregationChartProps> = ({
         duration: 1000,
       },
     },
-  };
+  }), [chartData]);
 
-  const columnConfig = {
+  const columnConfig = React.useMemo(() => ({
     data: aggregatedData,
     xField: 'category',
     yField: 'totalPower',
@@ -153,7 +172,7 @@ const EventsAggregationChart: React.FC<EventsAggregationChartProps> = ({
         duration: 800,
       },
     },
-  };
+  }), [aggregatedData]);
 
   if (eventsError) {
     return (
@@ -181,7 +200,7 @@ const EventsAggregationChart: React.FC<EventsAggregationChartProps> = ({
                 style={{ width: 150 }}
                 allowClear
                 value={selectedUser}
-                onChange={setSelectedUser}
+                onChange={handleUserChange}
                 loading={usersLoading}
               >
                 {users?.map(user => (
@@ -197,7 +216,7 @@ const EventsAggregationChart: React.FC<EventsAggregationChartProps> = ({
                 style={{ width: 150 }}
                 allowClear
                 value={selectedSensor}
-                onChange={setSelectedSensor}
+                onChange={handleSensorChange}
                 loading={sensorsLoading}
               >
                 {sensors?.map(sensor => (
@@ -210,16 +229,7 @@ const EventsAggregationChart: React.FC<EventsAggregationChartProps> = ({
             <Col>
               <RangePicker
                 showTime
-                onChange={(dates) => {
-                  if (dates) {
-                    setDateRange([
-                      dates[0]?.toISOString() || '',
-                      dates[1]?.toISOString() || '',
-                    ]);
-                  } else {
-                    setDateRange(undefined);
-                  }
-                }}
+                onChange={handleDateRangeChange}
               />
             </Col>
           </Row>
@@ -241,6 +251,6 @@ const EventsAggregationChart: React.FC<EventsAggregationChartProps> = ({
       )}
     </Card>
   );
-};
+});
 
 export default EventsAggregationChart;

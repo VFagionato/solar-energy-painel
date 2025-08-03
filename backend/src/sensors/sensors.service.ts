@@ -61,7 +61,7 @@ export class SensorsService {
   async update(uuid: string, updateSensorDto: UpdateSensorDto): Promise<Sensor> {
     const sensor = await this.findOne(uuid);
 
-    if (updateSensorDto.code && updateSensorDto.code !== sensor.code) {
+    if ('code' in updateSensorDto && updateSensorDto.code && updateSensorDto.code !== sensor.code) {
       const existingSensor = await this.sensorRepository.findOne({
         where: { code: updateSensorDto.code },
       });

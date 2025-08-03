@@ -7,7 +7,9 @@ export const useEvents = (startDate?: string, endDate?: string) => {
   return useQuery({
     queryKey: ['events', { startDate, endDate }],
     queryFn: () => apiService.getEvents(startDate, endDate),
-    staleTime: 2 * 60 * 1000, // 2 minutes (events change more frequently)
+    staleTime: 5 * 60 * 1000, // 5 minutes - increased to reduce re-fetching
+    gcTime: 10 * 60 * 1000, // 10 minutes cache time
+    refetchOnWindowFocus: false, // Prevent refetch on window focus
   });
 };
 
